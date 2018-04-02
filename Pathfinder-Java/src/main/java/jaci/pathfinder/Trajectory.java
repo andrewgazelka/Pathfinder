@@ -3,12 +3,46 @@ package jaci.pathfinder;
 /**
  * The Trajectory object contains an array of Segments that represent the location, velocity, acceleration, jerk and heading
  * of a particular point in the trajectory.
- *
+ * <p>
  * Trajectories can be generated with the Pathfinder class
  *
  * @author Jaci
  */
 public class Trajectory {
+
+    public Segment[] segments;
+
+    public Trajectory(Segment[] segments) {
+        this.segments = segments;
+    }
+
+    public Trajectory(int length) {
+        this.segments = new Segment[length];
+    }
+
+    public Segment get(int index) {
+        return segments[index];
+    }
+
+    public int length() {
+        return segments.length;
+    }
+
+    public Trajectory copy() {
+        Trajectory toCopy = new Trajectory(length());
+        for (int i = 0; i < length(); i++) {
+            toCopy.segments[i] = get(i).copy();
+        }
+        return toCopy;
+    }
+
+    /**
+     * The Fit Method defines the function by which the trajectory path is generated. By default, the HERMITE_CUBIC method
+     * is used.
+     */
+    public static enum FitMethod {
+        HERMITE_CUBIC, HERMITE_QUINTIC;
+    }
 
     /**
      * The Trajectory Configuration outlines the rules to follow while generating the trajectory. This includes
@@ -27,12 +61,13 @@ public class Trajectory {
 
         /**
          * Create a Trajectory Configuration
-         * @param fit                   The fit method to use
-         * @param samples               How many samples to use to refine the path (higher = smoother, lower = faster)
-         * @param dt                    The time delta between points (in seconds)
-         * @param max_velocity          The maximum velocity the body is capable of travelling at (in meters per second)
-         * @param max_acceleration      The maximum acceleration to use (in meters per second per second)
-         * @param max_jerk              The maximum jerk (acceleration per second) to use
+         *
+         * @param fit              The fit method to use
+         * @param samples          How many samples to use to refine the path (higher = smoother, lower = faster)
+         * @param dt               The time delta between points (in seconds)
+         * @param max_velocity     The maximum velocity the body is capable of travelling at (in meters per second)
+         * @param max_acceleration The maximum acceleration to use (in meters per second per second)
+         * @param max_jerk         The maximum jerk (acceleration per second) to use
          */
         public Config(FitMethod fit, int samples, double dt, double max_velocity, double max_acceleration, double max_jerk) {
             this.fit = fit;
@@ -67,13 +102,13 @@ public class Trajectory {
         }
 
         public boolean equals(Segment seg) {
-            return  seg.dt == dt && seg.x == x && seg.y == y &&
+            return seg.dt == dt && seg.x == x && seg.y == y &&
                     seg.position == position && seg.velocity == velocity &&
                     seg.acceleration == acceleration && seg.jerk == jerk && seg.heading == heading;
         }
 
         public boolean fuzzyEquals(Segment seg) {
-            return  ae(seg.dt, dt) && ae(seg.x, x) && ae(seg.y, y) && ae(seg.position, position) &&
+            return ae(seg.dt, dt) && ae(seg.x, x) && ae(seg.y, y) && ae(seg.position, position) &&
                     ae(seg.velocity, velocity) && ae(seg.acceleration, acceleration) && ae(seg.jerk, jerk) &&
                     ae(seg.heading, heading);
         }
@@ -81,40 +116,6 @@ public class Trajectory {
         private boolean ae(double one, double two) {
             return Math.abs(one - two) < 0.0001;        // Really small value
         }
-    }
-
-    /**
-     * The Fit Method defines the function by which the trajectory path is generated. By default, the HERMITE_CUBIC method
-     * is used.
-     */
-    public static enum FitMethod {
-        HERMITE_CUBIC, HERMITE_QUINTIC;
-    }
-
-    public Segment[] segments;
-
-    public Trajectory(Segment[] segments) {
-        this.segments = segments;
-    }
-
-    public Trajectory(int length) {
-        this.segments = new Segment[length];
-    }
-
-    public Segment get(int index) {
-        return segments[index];
-    }
-
-    public int length() {
-        return segments.length;
-    }
-
-    public Trajectory copy() {
-        Trajectory toCopy = new Trajectory(length());
-        for (int i = 0; i < length(); i++) {
-            toCopy.segments[i] = get(i).copy();
-        }
-        return toCopy;
     }
 
 }
